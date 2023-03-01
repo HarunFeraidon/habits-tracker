@@ -68,7 +68,6 @@ def mark_complete(id):
 def shift_data_left():
     # This function will be triggered every day at midnight
     with app.app_context():
-        print("did this work")
         charts = Chart.query.all()
         for chart in charts:
             chart.data = chart.data[1:] + '0'
@@ -81,7 +80,7 @@ def list_all():
     return charts_schema.jsonify(charts)
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=shift_data_left, trigger='cron', hour=22, minute=58)
+scheduler.add_job(func=shift_data_left, trigger='cron', hour=0, minute=0)
 scheduler.start()
 
 
