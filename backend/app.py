@@ -1,10 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from flask_cors import CORS
+
 from datetime import date
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/habits_tracker"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -73,6 +76,10 @@ def shift_data_left():
             chart.data = chart.data[1:] + '0'
         db.session.commit()
 
+@app.route('/get/<int:id>', methods=['GET'])
+def getChart(id):
+    chart = Chart.query.get_or_404(id)
+    return chart_schema.jsonify(chart)
 
 @app.route('/listall')
 def list_all():
