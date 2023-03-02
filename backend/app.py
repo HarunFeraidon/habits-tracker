@@ -57,16 +57,16 @@ def delete_chart(id):
     try:
         db.session.delete(chart_to_delete)
         db.session.commit()
-        return chart_schema.jsonify(chart_to_delete)
+        return {"status" : 204}
     except:
-        return "something went wrong in delete_chart()" 
+        return {"status" : 404}
 
 @app.route('/finish/<int:id>', methods=['POST'])
 def mark_complete(id):
     chart = Chart.query.get_or_404(id)
     chart.complete_today()
     db.session.commit()
-    return chart_schema.jsonify(chart)
+    return {"data" : chart.data}
 
 def shift_data_left():
     # This function will be triggered every day at midnight

@@ -20,7 +20,7 @@ function App() {
 
   return (
     <div className="App">
-      <h2> flask and react app</h2>
+      <h2> Flask and React App</h2>
       <ChartsList charts={charts}/>
     </div>
   );
