@@ -61,7 +61,7 @@ def delete_chart(id):
     except:
         return "something went wrong in delete_chart()" 
 
-@app.route('/finish/<int:id>')
+@app.route('/finish/<int:id>', methods=['POST'])
 def mark_complete(id):
     chart = Chart.query.get_or_404(id)
     chart.complete_today()
@@ -84,7 +84,8 @@ def getChart(id):
 @app.route('/listall')
 def list_all():
     charts = Chart.query.all()
-    return charts_schema.jsonify(charts)
+    charts = charts_schema.dump(charts)
+    return jsonify(charts)
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=shift_data_left, trigger='cron', hour=0, minute=0)

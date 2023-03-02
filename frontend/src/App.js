@@ -1,25 +1,27 @@
 import './App.css';
 import { useState, useEffect } from 'react';
+import ChartsList from './components/ChartsList';
 
 function App() {
 
   const [charts, setCharts] = useState([])
 
   useEffect( () => {
-    fetch('http://127.0.0.1:5000/get/2', {
+    fetch('/listall', {
       'methods': 'GET',
       headers: {
         'Content-Type':'application/json'
       }
     })
     .then(resp => resp.json())
-    .then(resp => console.log(resp))
+    .then(resp => setCharts(resp))
     .catch(error => console.log(error))
-  })
+  }, [])
 
   return (
     <div className="App">
       <h2> flask and react app</h2>
+      <ChartsList charts={charts}/>
     </div>
   );
 }
