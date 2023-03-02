@@ -4,9 +4,10 @@ function Chart(props) {
 
     const [data, setData] = useState(props.data)
 
-    function handleClick(id) {
-        fetch(`/finish/${id}`, {
-            method: "POST",
+    function handleClick(task, id) {
+        let delete_or_finish = task == "delete" ? "DELETE" : "POST"
+        fetch(`/${task}/${id}`, {
+            method: delete_or_finish,
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -25,7 +26,9 @@ function Chart(props) {
             <div className='row'>
                 <div className='col-md-1'>
                     <button className='btn btn-primary'
-                        onClick={() => handleClick(props.id)}> Complete today</button>
+                        onClick={() => handleClick("finish", props.id)}> Complete today</button>
+                    <button className='btn btn-primary'
+                        onClick={() => handleClick("delete", props.id)}> Delete</button>
                 </div>
             </div>
 
