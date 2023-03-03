@@ -10,7 +10,24 @@ function ChartsList(props) {
     }, [props.charts])
 
     function handleDelete(id) {
-        console.log(id)
+        fetch(`/delete/${id}`, {
+            method: "DELETE",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(resp => resp.json())
+            .then(resp => refreshItems(resp, id))
+            .catch(error => {
+                console.error('There was a problem with the API call:', error);
+            });
+    }
+
+    function refreshItems(resp, id){
+        if(resp.status == 204){
+            const newItems = items.filter((item) => item.id !== id);
+            setItems(newItems);
+        }
     }
 
 
