@@ -18,6 +18,10 @@ function Chart(props) {
             });
     }
 
+    function handleDelete(id){
+        props.handleDelete(id)
+    }
+
     return (
         <div className="item">
             <p>{props.title}</p>
@@ -26,6 +30,8 @@ function Chart(props) {
                 <div className='col-md-1'>
                     <button className='btn btn-primary'
                         onClick={() => handleUpdate(props.id)}> Complete today</button>
+                    <button className='btn btn-primary'
+                        onClick={() => handleDelete(props.id)}> Delete Chart</button>
                 </div>
             </div>
 
