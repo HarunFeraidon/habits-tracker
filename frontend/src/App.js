@@ -21,7 +21,9 @@ function App() {
   return (
     <div className="App">
       <h2> Flask and React App</h2>
-      <ChartsList charts={charts}/>
+      <div class="items">
+        <ChartsList charts={charts}/>
+      </div>
     </div>
   );
 }

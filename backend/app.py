@@ -25,7 +25,7 @@ class Chart(db.Model):
         self.title = title
         today = date.today()
         self.date_created = today
-        self.data = "0" * 365
+        self.data = "0" * 10
 
     def complete_today(self):
         lst = list(self.data)
