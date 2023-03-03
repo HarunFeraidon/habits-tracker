@@ -6,22 +6,24 @@ function App() {
 
   const [charts, setCharts] = useState([])
 
-  useEffect( () => {
+  useEffect(() => {
     fetch('/listall', {
       'methods': 'GET',
       headers: {
-        'Content-Type':'application/json'
+        'Content-Type': 'application/json'
       }
     })
-    .then(resp => resp.json())
-    .then(resp => setCharts(resp))
-    .catch(error => console.log(error))
+      .then(resp => resp.json())
+      .then(resp => setCharts(resp))
+      .catch(error => console.log(error))
   }, [])
 
   return (
     <div className="App">
-      <h2> flask and react app</h2>
-      <ChartsList charts={charts}/>
+      <h2> Flask and React App</h2>
+      <div className="items">
+        <ChartsList charts={charts} />
+      </div>
     </div>
   );
 }

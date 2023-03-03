@@ -1,45 +1,42 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import Chart from './Chart';
 
 function ChartsList(props) {
 
-    function handleClick(task, id) {
-        let delete_or_finish = task == "delete" ? "DELETE" : "POST"
-        fetch(`/${task}/${id}`, {
-            method: delete_or_finish,
+    const [items, setItems] = useState([])
+
+    useEffect(() => {
+        setItems(props.charts);
+    }, [props.charts])
+
+    function handleDelete(id) {
+        fetch(`/delete/${id}`, {
+            method: "DELETE",
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-            })
+            .then(resp => resp.json())
+            .then(resp => refreshItems(resp, id))
             .catch(error => {
                 console.error('There was a problem with the API call:', error);
             });
     }
 
-    return (
-        <div className="App">
-            {props.charts && props.charts.map(chart => {
-                return (
-                    <div key={chart.id}>
-                        <p>{chart.title}</p>
-                        <p>{chart.data}</p>
-                        <div className='row'>
-                            <div className='col-md-1'>
-                                <button className='btn btn-primary'
-                                    onClick={() => handleClick("finish", chart.id)}> Complete today</button>
-                                <button className='btn btn-primary'
-                                    onClick={() => handleClick("delete", chart.id)}> Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            })}
-        </div>
-    );
+    function refreshItems(resp, id){
+        if(resp.status == 204){
+            const newItems = items.filter((item) => item.id !== id);
+            setItems(newItems);
+        }
+    }
+
+
+    const itemsMap = items.map(chart => (
+        <Chart key={chart.id} id={chart.id} title={chart.title} data={chart.data} handleDelete={handleDelete}/>
+    ));
+
+
+    return <ul>{itemsMap}</ul>;
 }
 
 export default ChartsList
