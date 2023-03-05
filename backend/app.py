@@ -39,10 +39,10 @@ class ChartSchema(ma.Schema):
 chart_schema= ChartSchema()
 charts_schema= ChartSchema(many=True)
 
-@app.route('/create', methods=["POST"])
-def create_chart():
-    chart_title = request.json['title']
-    new_chart = Chart(title=chart_title)
+@app.route('/create/<title>', methods=["POST"])
+def create_chart(title):
+    # chart_title = request.json['title']
+    new_chart = Chart(title=str(title))
     
     try:
         db.session.add(new_chart)
