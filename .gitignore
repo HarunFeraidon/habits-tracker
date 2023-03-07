@@ -1,2 +1,6 @@
 venv/
 __pycache__/
+migrations/
+.vscode/
+node_modules/
+yarn.lock
