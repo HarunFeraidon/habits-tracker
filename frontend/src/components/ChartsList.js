@@ -32,7 +32,8 @@ function ChartsList(props) {
 
 
     const itemsMap = items.map(chart => (
-        <Chart key={chart.id} id={chart.id} title={chart.title} data={chart.data} handleDelete={handleDelete}/>
+        <Chart key={chart.id} id={chart.id} title={chart.title} data={chart.data}
+        date_created={chart.date_created} one_year_ago={chart.one_year_ago} handleDelete={handleDelete}/>
     ));
 
 

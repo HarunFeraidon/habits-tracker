@@ -27,7 +27,9 @@ function Chart(props) {
     return (
         <div className="item">
             <p>{props.title}</p>
-            <CalendarChart data={data} />
+            <p>{props.date_created}</p>
+            <p>{props.one_year_ago}</p>
+            {/* <CalendarChart data={data} /> */}
             <div className='row'>
                 <div className='col-md-1'>
                     <button className='btn btn-primary'
