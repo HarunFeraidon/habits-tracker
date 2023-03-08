@@ -1,4 +1,6 @@
+import { ResponsiveCalendar } from '@nivo/calendar';
 import React, { useState, useEffect } from 'react'
+import CalendarChart from '../CalendarChart';
 
 function Chart(props) {
 
@@ -18,14 +20,16 @@ function Chart(props) {
             });
     }
 
-    function handleDelete(id){
+    function handleDelete(id) {
         props.handleDelete(id)
     }
 
     return (
         <div className="item">
             <p>{props.title}</p>
-            <p>{data}</p>
+            {/* <p>{props.date_created}</p> */}
+            {/* <p>{props.one_year_ago}</p> */}
+            <CalendarChart data={data} date_created={props.date_created} one_year_ago={props.one_year_ago}/>
             <div className='row'>
                 <div className='col-md-1'>
                     <button className='btn btn-primary'
