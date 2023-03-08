@@ -35,7 +35,7 @@ class Chart(db.Model):
     def init_data(self):
         # one_year_ago = datetime.now() - timedelta(days=365)
         data_list = []
-        for i in range(2):
+        for i in range(365):
             date = self.one_year_ago + timedelta(days=i)
             data_list.append({"value": 0, "day": date.strftime('%Y-%m-%d')})
         return json.dumps(data_list)

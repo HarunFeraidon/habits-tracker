@@ -4,10 +4,14 @@ import { ResponsiveCalendar } from '@nivo/calendar'
 function CalendarChart(props) {
     return (
         <div className='chart' style={{ height: 200 }}>
+            {/* {props.data} */}
+            {/* {props.date_created} */}
+            {/* {typeof props.data} */}
+            {typeof JSON.parse(props.data)}
             <ResponsiveCalendar
-                data={props.data}
-                from="2022-03-07"
-                to="2023-03-06"
+                data={JSON.parse(props.data)}
+                from={props.date_created}
+                to={props.one_year_ago}
                 emptyColor="#eeeeee"
                 colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
                 margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
