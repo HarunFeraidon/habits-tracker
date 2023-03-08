@@ -22,19 +22,21 @@ class Chart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
     date_created = db.Column(db.Date, default=date.today())
+    one_year_ago = db.Column(db.Date)
     data = db.Column(db.JSON)
 
     def __init__(self, title):
         self.title = title
         today = date.today()
         self.date_created = today
+        self.one_year_ago = date.today() - timedelta(days=365)
         self.data = self.init_data()
     
     def init_data(self):
-        one_year_ago = datetime.now() - timedelta(days=365)
+        # one_year_ago = datetime.now() - timedelta(days=365)
         data_list = []
         for i in range(2):
-            date = one_year_ago + timedelta(days=i)
+            date = self.one_year_ago + timedelta(days=i)
             data_list.append({"value": 0, "day": date.strftime('%Y-%m-%d')})
         return json.dumps(data_list)
 
@@ -52,7 +54,7 @@ class Chart(db.Model):
 
 class ChartSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'title', 'date_created', 'data')
+        fields = ('id', 'title', 'date_created', 'data', 'one_year_ago')
 
 chart_schema= ChartSchema()
 charts_schema= ChartSchema(many=True)
