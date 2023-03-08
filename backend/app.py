@@ -21,27 +21,19 @@ ma = Marshmallow(app)
 class Chart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
-    # date_created = db.Column(db.Date, default=date.today())
     year_start = db.Column(db.Date)
     year_end = db.Column(db.Date)
-    # one_year_ago = db.Column(db.Date)
     data = db.Column(db.JSON)
 
     def __init__(self, title):
         self.title = title
-        # today = date.today()
-        # self.date_created = today
         reference_year = date.today().year
         self.year_start = datetime(reference_year, 1, 1)
         self.year_end = datetime(reference_year, 12, 31)
-        # self.one_year_ago = date.today() - timedelta(days=365)
         self.data = self.init_data()
     
     def init_data(self):
-        # one_year_ago = datetime.now() - timedelta(days=365)
         data_list = []
-        # for i in range(365):
-        # date = self.one_year_ago + timedelta(days=i)
         data_list.append({"value": 0, "day": date.today().strftime('%Y-%m-%d')})
         return json.dumps(data_list)
     
@@ -52,7 +44,6 @@ class Chart(db.Model):
 
     def append_day(self):
         all_data = json.loads(self.data)
-        # all_data = all_data[1:]
         all_data.append({"value": 0, "date": datetime.now().strftime('%Y-%m-%d')})
         if(date.today().year != self.year_end):
             reference_year = date.today().year
@@ -76,6 +67,17 @@ def inspect(id):
 def create_chart(title):
     new_chart = Chart(title=str(title))
     
+    try:
+        db.session.add(new_chart)
+        db.session.commit()
+        return chart_schema.jsonify(new_chart)
+    except Exception as e:
+        return f"something went wrong in create_task(): {e}"
+    
+@app.route('/create_bf', methods=["POST"])
+def create_bf():
+    new_chart = Chart(title=request.json["title"])
+    new_chart.data = json.dumps(request.json["data"])
     try:
         db.session.add(new_chart)
         db.session.commit()
