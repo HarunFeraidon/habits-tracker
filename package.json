@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@nivo/calendar": "^0.80.0",
+    "@nivo/colors": "^0.80.0",
     "@nivo/core": "^0.80.0"
   }
 }

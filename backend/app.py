@@ -35,7 +35,7 @@ class Chart(db.Model):
         data_list = []
         for i in range(2):
             date = one_year_ago + timedelta(days=i)
-            data_list.append({"value": 0, "date": date.strftime('%Y-%m-%d')})
+            data_list.append({"value": 0, "day": date.strftime('%Y-%m-%d')})
         return json.dumps(data_list)
 
     def complete_today(self):

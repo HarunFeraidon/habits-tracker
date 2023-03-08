@@ -24,7 +24,7 @@ function ChartsList(props) {
     }
 
     function refreshItems(resp, id){
-        if(resp.status == 204){
+        if(resp.status === 204){
             const newItems = items.filter((item) => item.id !== id);
             setItems(newItems);
         }
