@@ -55,7 +55,8 @@ class Chart(db.Model):
         # all_data = all_data[1:]
         all_data.append({"value": 0, "date": datetime.now().strftime('%Y-%m-%d')})
         if(date.today().year != self.year_end):
-            self.year_end = date.today().year
+            reference_year = date.today().year
+            self.year_end = datetime(reference_year, 12, 31)
         self.data = json.dumps(all_data)
         
 

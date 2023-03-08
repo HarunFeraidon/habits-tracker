@@ -6,8 +6,8 @@ function CalendarChart(props) {
         <div className='chart' style={{ height: 200 }}>
             <ResponsiveCalendar
                 data={JSON.parse(props.data)}
-                from={props.one_year_ago}
-                to={props.date_created}
+                from={props.year_start}
+                to={props.year_end}
                 emptyColor="#eeeeee"
                 colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
                 margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
