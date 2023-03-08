@@ -2,15 +2,8 @@ import React from 'react'
 import { ResponsiveCalendar } from '@nivo/calendar'
 
 function CalendarChart(props) {
-    // console.log(JSON.parse(props.data));
-    // console.log(props.date_created);
-    // console.log(props.one_year_ago);
     return (
         <div className='chart' style={{ height: 200 }}>
-            {/* {props.data} */}
-            {/* {props.date_created} */}
-            {/* {typeof props.data} */}
-            {/* {typeof JSON.parse(props.data)} */}
             <ResponsiveCalendar
                 data={JSON.parse(props.data)}
                 from={props.one_year_ago}
