@@ -10,7 +10,6 @@ function CalendarChart(props) {
     const to_date = new Date(year_end, 11, 31);
     return (
         <div className='chart' style={{ height: 200 }}>
-            {typeof new Date(Date.parse(props.year_start))}
             <ResponsiveCalendar
                 data={JSON.parse(props.data)}
                 from={from_date}

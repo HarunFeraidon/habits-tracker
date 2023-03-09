@@ -23,17 +23,18 @@ function ChartsList(props) {
             });
     }
 
-    function refreshItems(resp, id){
-        if(resp.status === 204){
+    function refreshItems(resp, id) {
+        if (resp.status === 204) {
             const newItems = items.filter((item) => item.id !== id);
             setItems(newItems);
         }
     }
 
-
     const itemsMap = items.map(chart => (
-        <Chart key={chart.id} id={chart.id} title={chart.title} data={chart.data}
-        year_start={chart.year_start} year_end={chart.year_end} handleDelete={handleDelete}/>
+        <div class="container">
+            <Chart key={chart.id} id={chart.id} title={chart.title} data={chart.data}
+                year_start={chart.year_start} year_end={chart.year_end} handleDelete={handleDelete} />
+        </div>
     ));
 
 

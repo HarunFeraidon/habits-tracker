@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import CalendarChart from './CalendarChart';
 
 function Chart(props) {
@@ -25,6 +25,7 @@ function Chart(props) {
 
     return (
         <div className="item">
+            <h3>{props.title}</h3>
             <CalendarChart data={data} year_start={props.year_start} year_end={props.year_end}/>
             <div className='row'>
                 <div className='col-md-1'>

@@ -33,7 +33,7 @@ function App() {
       });
   }
 
-  function addNewChart(chart){
+  function addNewChart(chart) {
     console.log("Chart here: " + chart);
     let chartsCopy = [...charts];
     chartsCopy.push(chart)
@@ -42,9 +42,15 @@ function App() {
 
   return (
     <div className="App">
-      <h2> Flask and React App</h2>
-      <TextForm submitFunction={handleCreate} />
-      <div className="items">
+      <div class="container text-center">
+        <div class="row justify-content-md-center">
+          <h4>Track Your Goals</h4>
+        </div>
+        <div class="row ">
+          <TextForm submitFunction={handleCreate} />
+        </div>
+      </div>
+      <div className="container text-center">
         <ChartsList charts={charts} />
       </div>
     </div>
