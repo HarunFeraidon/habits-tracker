@@ -42,11 +42,11 @@ function App() {
 
   return (
     <div className="App">
-      <div class="container text-center">
-        <div class="row justify-content-md-center">
+      <div className="container text-center">
+        <div className="row justify-content-md-center">
           <h4>Track Your Goals</h4>
         </div>
-        <div class="row ">
+        <div className="row ">
           <TextForm submitFunction={handleCreate} />
         </div>
       </div>
