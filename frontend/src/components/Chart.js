@@ -43,7 +43,7 @@ function Chart(props) {
 
     return (
         <div className="row">
-            <div className="col-4">
+            <div className="col-2">
                 <div className="row">
                     <div className="col-12">
                         <h3>{props.title}</h3>
@@ -58,7 +58,7 @@ function Chart(props) {
                     </div>
                 </div>
             </div>
-            <div className="col-8">
+            <div className="col-10">
                 <CalendarChart data={data} year_start={props.year_start} year_end={props.year_end} />
             </div>
         </div>
