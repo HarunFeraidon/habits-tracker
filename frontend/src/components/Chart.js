@@ -24,23 +24,23 @@ function Chart(props) {
     }
 
     return (
-        <div className="row border">
-            <div className="col-2 border">
-                <div className="row border justify-content-around">
-                    <div className="col-12 border">
+        <div className="row">
+            <div className="col-2">
+                <div className="row justify-content-around">
+                    <div className="col-12">
                         <h3>{props.title}</h3>
                     </div>
-                    <div className="col-12 border">
+                    <div className="col-12">
                         <button className='btn btn-primary'
                             onClick={() => handleUpdate(props.id)}> Complete today</button>
                     </div>
-                    <div className="col-12 border">
+                    <div className="col-12">
                         <button className='btn btn-primary'
                             onClick={() => handleDelete(props.id)}> Delete Chart</button>
                     </div>
                 </div>
             </div>
-            <div className="col-10 border">
+            <div className="col-10">
                 <CalendarChart data={data} year_start={props.year_start} year_end={props.year_end} />
             </div>
         </div>
