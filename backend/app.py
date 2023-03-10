@@ -44,7 +44,7 @@ class Chart(db.Model):
 
     def append_day(self):
         all_data = json.loads(self.data)
-        all_data.append({"value": 0, "date": datetime.now().strftime('%Y-%m-%d')})
+        all_data.append({"value": 0, "day": datetime.now().strftime('%Y-%m-%d')})
         if(date.today().year != self.year_end):
             reference_year = date.today().year
             self.year_end = datetime(reference_year, 12, 31)
