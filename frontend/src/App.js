@@ -40,6 +40,25 @@ function App() {
     setCharts(chartsCopy);
   }
 
+  function handleDelete(id) {
+    fetch(`/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(resp => resp.json())
+      .then(resp => {
+        if (resp.status === 204) {
+          const newCharts = charts.filter((chart) => chart.id !== id);
+          setCharts(newCharts);
+        }
+      })
+      .catch(error => {
+        console.error('There was a problem with the API call:', error);
+      });
+  }
+
   return (
     <div className="App">
       <div className="container text-center">
@@ -51,7 +70,7 @@ function App() {
         </div>
       </div>
       <div className="container text-center">
-        <ChartsList charts={charts} />
+        <ChartsList charts={charts} handleDelete={handleDelete}/>
       </div>
     </div>
   );
