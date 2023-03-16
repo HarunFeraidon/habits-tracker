@@ -33,19 +33,44 @@ function App() {
       });
   }
 
-  function addNewChart(chart){
+  function addNewChart(chart) {
     console.log("Chart here: " + chart);
     let chartsCopy = [...charts];
     chartsCopy.push(chart)
     setCharts(chartsCopy);
   }
 
+  function handleDelete(id) {
+    fetch(`/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(resp => resp.json())
+      .then(resp => {
+        if (resp.status === 204) {
+          const newCharts = charts.filter((chart) => chart.id !== id);
+          setCharts(newCharts);
+        }
+      })
+      .catch(error => {
+        console.error('There was a problem with the API call:', error);
+      });
+  }
+
   return (
     <div className="App">
-      <h2> Flask and React App</h2>
-      <TextForm submitFunction={handleCreate} />
-      <div className="items">
-        <ChartsList charts={charts} />
+      <div className="container text-center">
+        <div className="row justify-content-md-center">
+          <h4>Track Your Goals</h4>
+        </div>
+        <div className="row ">
+          <TextForm submitFunction={handleCreate} />
+        </div>
+      </div>
+      <div className="container text-center">
+        <ChartsList charts={charts} handleDelete={handleDelete}/>
       </div>
     </div>
   );

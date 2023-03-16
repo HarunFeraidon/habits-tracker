@@ -23,8 +23,6 @@ function TextForm(props) {
                 onChange={handleChange}
             />
             <button className='btn btn-primary' type="submit">Submit</button>
-            {/* <p>You entered: {text}</p> */}
-            <hr />
         </form>
     );
 }
