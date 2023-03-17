@@ -1,18 +1,64 @@
-from flask import Flask, jsonify, request
+import os
+from dotenv import load_dotenv
+from flask import Flask, jsonify, request, url_for, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
 import json
 
-from datetime import date, datetime, timedelta
+from authlib.integrations.flask_client import OAuth
+
+from datetime import date, datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 CORS(app)
 
+oauth = OAuth(app)
+
+load_dotenv() 
+
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/habits_tracker"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+
+google = oauth.register(
+    name = 'google',
+    client_id = os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET"),
+    access_token_url = 'https://accounts.google.com/o/oauth2/token',
+    access_token_params = None,
+    authorize_url = 'https://accounts.google.com/o/oauth2/auth',
+    authorize_params = None,
+    api_base_url = 'https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint = 'https://openidconnect.googleapis.com/v1/userinfo',  # This is only needed if using openId to fetch user info
+    server_metadata_url=CONF_URL,
+    client_kwargs = {'scope': 'email profile'}, # removed 'openid' from this line
+)
+
+@app.route('/login')
+def login():
+    print("login")
+    google = oauth.create_client('google')
+    redirect_uri = url_for('authorize', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/auth')
+def authorize():
+    print("authorize")
+    google = oauth.create_client('google')
+    token = google.authorize_access_token()
+    resp = google.get('userinfo').json()
+    print(f"\n{resp}\n")
+    return "succesful login with google"
+    # resp.raise_for_status()
+    # profile = resp.json()
+    # do something with the token and profile
+    # return redirect('/')
+
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
