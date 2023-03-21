@@ -2,10 +2,38 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import ChartsList from './components/ChartsList';
 import TextForm from './components/TextForm';
+import Axios from "axios";
 
 function App() {
 
-  const [charts, setCharts] = useState([])
+  const [charts, setCharts] = useState([]);
+  const [user, setUser] = useState({});
+  const [status, setStatus] = useState(false);
+  const [loginButton, setLoginButton] = useState(null);
+
+  useEffect(() => {
+    fetch('/userinfo')
+      .then(resp => resp.json())
+      .then(resp => {
+        setUser(resp)
+        setStatus(resp["authenticated"])
+        if (status == false) {
+          setLoginButton(
+            <a href="#" onClick={() => handleLogin()}>log in here</a>
+            // <button className='btn btn-primary'
+            //   onClick={() => handleLogin()}> Login with Google</button>
+          );
+        }
+        else {
+          setLoginButton(
+            <button className='btn btn-primary'
+              onClick={() => handleLogout()}> Logout</button>
+          );
+        }
+        console.log(resp["authenticated"])
+      })
+      .catch(error => console.log(error))
+  }, [])
 
   useEffect(() => {
     fetch('/listall', {
@@ -59,10 +87,29 @@ function App() {
       });
   }
 
+  function handleLogin() {
+    console.log("login")
+    fetch('/login')
+      .then(response => response.json())
+      .then(data => {
+        // Redirect to authorization page
+        window.location.href = data.auth_url;
+      })
+      .catch(error => {
+        // Handle error
+      });
+
+  }
+
+  function handleLogout() {
+    console.log("logout")
+  }
+
   return (
     <div className="App">
       <div className="container text-center">
         <div className="row justify-content-md-center">
+          {loginButton}
           <h4>Track Your Goals</h4>
         </div>
         <div className="row ">
@@ -70,7 +117,7 @@ function App() {
         </div>
       </div>
       <div className="container text-center">
-        <ChartsList charts={charts} handleDelete={handleDelete}/>
+        <ChartsList charts={charts} handleDelete={handleDelete} />
       </div>
     </div>
   );

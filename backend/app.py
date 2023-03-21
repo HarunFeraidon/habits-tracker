@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
+from flask_login import LoginManager, current_user, login_required, login_user, UserMixin
 import json
 
 from authlib.integrations.flask_client import OAuth
@@ -14,6 +15,9 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 CORS(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 oauth = OAuth(app)
 
@@ -41,28 +45,55 @@ google = oauth.register(
 
 @app.route('/login')
 def login():
-    print("login")
     google = oauth.create_client('google')
     redirect_uri = url_for('authorize', _external=True)
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/auth')
 def authorize():
-    print("authorize")
     google = oauth.create_client('google')
     token = google.authorize_access_token()
     resp = google.get('userinfo').json()
+    # Check if the user already exists in the database
+    user = User.query.filter_by(email=resp['email']).first()
+    # If the user doesn't exist, create a new user
+    if not user:
+        user = User(email=resp['email'], google_id=resp['id'])
+        db.session.add(user)
+        db.session.commit()
+    # Log the user in using Flask-Login
+    login_user(user)
+
     print(f"\n{resp}\n")
-    return "succesful login with google"
-    # resp.raise_for_status()
-    # profile = resp.json()
-    # do something with the token and profile
-    # return redirect('/')
+    return redirect(url_for('list_all'))
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get_or_404(user_id)
+
+@app.route('/userinfo')
+def user_info():
+    if current_user.is_authenticated:
+        user = {
+            'id': current_user.id,
+            'email': current_user.email,
+            'authenticated': True,
+            # add any other fields you want to return
+        }
+        return jsonify(user)
+    else:
+        return jsonify({'message': 'User is not logged in', 'authenticated': False})
 
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 ma = Marshmallow(app)
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    google_id = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(50), unique=True, nullable=False)
+    charts = db.relationship('Chart', backref='user', lazy=True)
 
 class Chart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,6 +101,7 @@ class Chart(db.Model):
     year_start = db.Column(db.Date)
     year_end = db.Column(db.Date)
     data = db.Column(db.JSON)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __init__(self, title):
         self.title = title
@@ -99,7 +131,7 @@ class Chart(db.Model):
 
 class ChartSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'title', 'date_created', 'year_start', 'year_end', 'data')
+        fields = ('id', 'title', 'year_start', 'year_end', 'data', 'user_id')
 
 chart_schema= ChartSchema()
 charts_schema= ChartSchema(many=True)
@@ -110,9 +142,10 @@ def inspect(id):
     return chart.data
 
 @app.route('/create/<title>', methods=["POST"])
+@login_required
 def create_chart(title):
     new_chart = Chart(title=str(title))
-    
+    new_chart.user = current_user
     try:
         db.session.add(new_chart)
         db.session.commit()
@@ -132,6 +165,7 @@ def create_bf():
         return f"something went wrong in create_task(): {e}"
     
 @app.route('/delete/<int:id>', methods=['DELETE'])
+@login_required
 def delete_chart(id):
     chart_to_delete = Chart.query.get_or_404(id)
     try:
@@ -162,8 +196,9 @@ def getChart(id):
     return chart_schema.jsonify(chart)
 
 @app.route('/listall')
+@login_required
 def list_all():
-    charts = Chart.query.all()
+    charts = Chart.query.filter_by(user_id=current_user.id).all()
     charts = charts_schema.dump(charts)
     return jsonify(charts)
 
