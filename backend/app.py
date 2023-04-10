@@ -29,43 +29,44 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
 
-google = oauth.register(
-    name = 'google',
-    client_id = os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret = os.getenv("GOOGLE_CLIENT_SECRET"),
-    access_token_url = 'https://accounts.google.com/o/oauth2/token',
-    access_token_params = None,
-    authorize_url = 'https://accounts.google.com/o/oauth2/auth',
-    authorize_params = None,
-    api_base_url = 'https://www.googleapis.com/oauth2/v1/',
-    userinfo_endpoint = 'https://openidconnect.googleapis.com/v1/userinfo',  # This is only needed if using openId to fetch user info
-    server_metadata_url=CONF_URL,
-    client_kwargs = {'scope': 'email profile'}, # removed 'openid' from this line
-)
+# google = oauth.register(
+#     name = 'google',
+#     client_id = os.getenv("GOOGLE_CLIENT_ID"),
+#     client_secret = os.getenv("GOOGLE_CLIENT_SECRET"),
+#     access_token_url = 'https://accounts.google.com/o/oauth2/token',
+#     access_token_params = None,
+#     authorize_url = 'https://accounts.google.com/o/oauth2/auth',
+#     authorize_params = None,
+#     api_base_url = 'https://www.googleapis.com/oauth2/v1/',
+#     userinfo_endpoint = 'https://openidconnect.googleapis.com/v1/userinfo',  # This is only needed if using openId to fetch user info
+#     server_metadata_url=CONF_URL,
+#     client_kwargs = {'scope': 'email profile'}, # removed 'openid' from this line
+# )
 
-@app.route('/login')
-def login():
-    google = oauth.create_client('google')
-    redirect_uri = url_for('authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
+# @app.route('/login')
+# def login():
+#     google = oauth.create_client('google')
+#     redirect_uri = url_for('authorize', _external=True)
+#     return google.authorize_redirect(redirect_uri)
 
-@app.route('/auth')
-def authorize():
-    google = oauth.create_client('google')
-    token = google.authorize_access_token()
-    resp = google.get('userinfo').json()
-    # Check if the user already exists in the database
-    user = User.query.filter_by(email=resp['email']).first()
-    # If the user doesn't exist, create a new user
-    if not user:
-        user = User(email=resp['email'], google_id=resp['id'])
-        db.session.add(user)
-        db.session.commit()
-    # Log the user in using Flask-Login
-    login_user(user)
+# @app.route('/auth')
+# def authorize():
+#     print("inside auth")
+#     google = oauth.create_client('google')
+#     token = google.authorize_access_token()
+#     resp = google.get('userinfo').json()
+#     # Check if the user already exists in the database
+#     user = User.query.filter_by(email=resp['email']).first()
+#     # If the user doesn't exist, create a new user
+#     if not user:
+#         user = User(email=resp['email'], google_id=resp['id'])
+#         db.session.add(user)
+#         db.session.commit()
+#     # Log the user in using Flask-Login
+#     login_user(user)
 
-    print(f"\n{resp}\n")
-    return redirect(url_for('list_all'))
+#     print(f"\n{resp}\n")
+#     return redirect(url_for('list_all'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -142,7 +143,7 @@ def inspect(id):
     return chart.data
 
 @app.route('/create/<title>', methods=["POST"])
-@login_required
+# @login_required
 def create_chart(title):
     new_chart = Chart(title=str(title))
     new_chart.user = current_user
@@ -165,7 +166,7 @@ def create_bf():
         return f"something went wrong in create_task(): {e}"
     
 @app.route('/delete/<int:id>', methods=['DELETE'])
-@login_required
+# @login_required
 def delete_chart(id):
     chart_to_delete = Chart.query.get_or_404(id)
     try:
@@ -196,7 +197,7 @@ def getChart(id):
     return chart_schema.jsonify(chart)
 
 @app.route('/listall')
-@login_required
+# @login_required
 def list_all():
     charts = Chart.query.filter_by(user_id=current_user.id).all()
     charts = charts_schema.dump(charts)
