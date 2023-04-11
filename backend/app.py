@@ -7,10 +7,9 @@ from flask_marshmallow import Marshmallow
 from flask_cors import CORS
 from flask_login import LoginManager, current_user, login_required, login_user, UserMixin
 import json
+import jwt
 
-from authlib.integrations.flask_client import OAuth
-
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
@@ -19,54 +18,11 @@ CORS(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-oauth = OAuth(app)
+load_dotenv()
 
-load_dotenv() 
-
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/habits_tracker"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
-
-# google = oauth.register(
-#     name = 'google',
-#     client_id = os.getenv("GOOGLE_CLIENT_ID"),
-#     client_secret = os.getenv("GOOGLE_CLIENT_SECRET"),
-#     access_token_url = 'https://accounts.google.com/o/oauth2/token',
-#     access_token_params = None,
-#     authorize_url = 'https://accounts.google.com/o/oauth2/auth',
-#     authorize_params = None,
-#     api_base_url = 'https://www.googleapis.com/oauth2/v1/',
-#     userinfo_endpoint = 'https://openidconnect.googleapis.com/v1/userinfo',  # This is only needed if using openId to fetch user info
-#     server_metadata_url=CONF_URL,
-#     client_kwargs = {'scope': 'email profile'}, # removed 'openid' from this line
-# )
-
-# @app.route('/login')
-# def login():
-#     google = oauth.create_client('google')
-#     redirect_uri = url_for('authorize', _external=True)
-#     return google.authorize_redirect(redirect_uri)
-
-# @app.route('/auth')
-# def authorize():
-#     print("inside auth")
-#     google = oauth.create_client('google')
-#     token = google.authorize_access_token()
-#     resp = google.get('userinfo').json()
-#     # Check if the user already exists in the database
-#     user = User.query.filter_by(email=resp['email']).first()
-#     # If the user doesn't exist, create a new user
-#     if not user:
-#         user = User(email=resp['email'], google_id=resp['id'])
-#         db.session.add(user)
-#         db.session.commit()
-#     # Log the user in using Flask-Login
-#     login_user(user)
-
-#     print(f"\n{resp}\n")
-#     return redirect(url_for('list_all'))
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -92,7 +48,6 @@ ma = Marshmallow(app)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    google_id = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
     charts = db.relationship('Chart', backref='user', lazy=True)
 
@@ -136,6 +91,65 @@ class ChartSchema(ma.Schema):
 
 chart_schema= ChartSchema()
 charts_schema= ChartSchema(many=True)
+
+@app.route('/create_user', methods=['POST'])
+def create_user():
+    email = request.form['email']
+    user = User.query.filter_by(email=email).first()
+    token = jwt.encode({
+            'email': email,
+            'exp': datetime.utcnow() + timedelta(minutes=30) # set token expiration time
+        }, app.config['SECRET_KEY'], algorithm='HS256')
+
+    if user is None:
+        user = User(email=email)
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({
+            'message': f"User with email '{email}' has been created!",
+            'token': token # .decode('utf-8')
+        }), 200
+    else:
+        return jsonify({
+            'message': f"User with email '{email}' already exists.",
+            'token': token # .decode('utf-8')
+        }), 200
+    
+# Function to decode and verify JWT token
+def decode_jwt(token):
+    try:
+        # Decode and verify JWT token using secret key
+        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        # Handle expired token
+        return None
+    except jwt.InvalidTokenError:
+        # Handle invalid token
+        return None
+
+# Example route using JWT authentication
+@app.route('/authenticated_route')
+def authenticated_route():
+    token = request.headers.get('Authorization')  # Get JWT token from request headers
+    print(f"token: {token}")
+    if token:
+        decoded_token = decode_jwt(token)  # Decode and verify JWT token
+        print(decoded_token)
+        print(f"type(decoded_token) {decoded_token}")
+        if decoded_token:
+            # Token is valid, continue processing the route
+            email = decoded_token['email']
+            # print(email)
+            # Retrieve user information based on the email or other identifier
+            # ... (your code here)
+            return "Authenticated route: Hello, {}".format(email)
+        else:
+            # Token is invalid or expired, return error response
+            return "Unauthorized", 401
+    else:
+        # Token is missing, return error response
+        return "Unauthorized", 401
 
 @app.route('/inspect/<int:id>', methods=["GET"])
 def inspect(id):

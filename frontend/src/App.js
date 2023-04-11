@@ -4,6 +4,7 @@ import ChartsList from './components/ChartsList';
 import TextForm from './components/TextForm';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from "jwt-decode";
+import { useJwt } from "react-jwt";
 
 
 function App() {
@@ -62,18 +63,67 @@ function App() {
   //     });
   // }
 
+  const responseMessage = (credentialResponse) => {
+    var decoded = jwt_decode(credentialResponse.credential);
+    console.log(decoded);
+    createUser(decoded.email)
+  };
+  const errorMessage = (error) => {
+    console.log(error);
+  };
+
+  let authToken = '';
+
+  function createUser(email) {
+    const formData = new FormData()
+    formData.append('email', email)
+
+    fetch('/create_user', {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        console.log(typeof(data));
+        console.log("data.token: " + data.token)
+        authToken = data.token;
+      })
+      .catch(error => {
+        console.error(error)
+      })
+  }
+
+  function printToken(){
+    console.log(authToken)
+  }
+
+  function fetchAuthenticatedData() {
+    // Use the authToken in the headers of authenticated requests
+    fetch('/authenticated_route', {
+      headers: {
+        'Authorization': `${authToken}` // Use the stored authToken
+      }
+    })
+    .then(response => {
+      response.json()
+    })
+    .then(response => {
+      console.log(response)
+    })
+    .catch(error => {
+      console.error(error);
+    });
+  }
+
   return (
     <div className="App">
       <GoogleLogin
-            onSuccess={credentialResponse => {
-              console.log(credentialResponse.credential);
-              var decoded = jwt_decode(credentialResponse.credential);
-              console.log(decoded)
-            }}
-            onError={() => {
-              console.log('Login Failed');
-            }}
-          />;
+        onSuccess={responseMessage}
+        onError={errorMessage}
+      />;
+      <button onClick={printToken}>Click here</button>
+      <button onClick={fetchAuthenticatedData}>authenticated_route here</button>
       {/* <div className="container text-center">
         <div className="row justify-content-md-center">
           
