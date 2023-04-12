@@ -37,7 +37,8 @@ function App() {
     fetch(`/create/${title}`, {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `${authToken}` // Use the stored authToken
       }
     })
       .then(resp => resp.json())

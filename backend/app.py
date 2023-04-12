@@ -192,9 +192,15 @@ def inspect(id):
 
 @app.route('/create/<title>', methods=["POST"])
 # @login_required
-def create_chart(title):
+@jwt_required
+def create_chart(title, **kwargs):
+    email = kwargs.get('email') 
+    print(f"inside create_chart: {email}")
     new_chart = Chart(title=str(title))
-    new_chart.user = current_user
+    print(new_chart)
+    user = User.query.filter_by(email=email).first() # Use .first() to retrieve a single User object
+    print(user)
+    new_chart.user = user
     try:
         db.session.add(new_chart)
         db.session.commit()
