@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
-from flask_login import LoginManager, current_user, login_required, login_user, UserMixin
+# from flask_login import LoginManager, current_user, login_required, login_user, UserMixin
 import json
 import jwt
 from functools import wraps
@@ -16,8 +16,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 CORS(app)
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+# login_manager = LoginManager()
+# login_manager.init_app(app)
 
 load_dotenv()
 
@@ -25,29 +25,30 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:@localhost/habits_
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get_or_404(user_id)
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return User.query.get_or_404(user_id)
 
-@app.route('/userinfo')
-def user_info():
-    if current_user.is_authenticated:
-        user = {
-            'id': current_user.id,
-            'email': current_user.email,
-            'authenticated': True,
-            # add any other fields you want to return
-        }
-        return jsonify(user)
-    else:
-        return jsonify({'message': 'User is not logged in', 'authenticated': False})
+# @app.route('/userinfo')
+# def user_info():
+#     if current_user.is_authenticated:
+#         user = {
+#             'id': current_user.id,
+#             'email': current_user.email,
+#             'authenticated': True,
+#             # add any other fields you want to return
+#         }
+#         return jsonify(user)
+#     else:
+#         return jsonify({'message': 'User is not logged in', 'authenticated': False})
 
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 ma = Marshmallow(app)
 
-class User(UserMixin, db.Model):
+# class User(UserMixin, db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True, nullable=False)
     charts = db.relationship('Chart', backref='user', lazy=True)
@@ -141,6 +142,7 @@ def jwt_required(f):
             if decoded_token:
                 # Token is valid, continue processing the route
                 email = decoded_token['email']
+                kwargs['email'] = email
                 # print(email)
                 # Retrieve user information based on the email or other identifier
                 # ... (your code here)
@@ -152,8 +154,11 @@ def jwt_required(f):
 # Example of a protected route using the 'jwt_required' decorator
 @app.route('/api/protected')
 @jwt_required  # Apply 'jwt_required' decorator to protect this route
-def protected_route():
+def protected_route(**kwargs):
+    email = kwargs.get('email') 
     print("ligma ligma ligma")
+    print(f"email: {email}")
+    # print(f"current_user.id: {current_user.id}")
     return jsonify({'message': 'This is a protected route. Authentication successful.'})
 
 
@@ -241,10 +246,17 @@ def getChart(id):
 
 @app.route('/listall')
 # @login_required
-def list_all():
-    charts = Chart.query.filter_by(user_id=current_user.id).all()
-    charts = charts_schema.dump(charts)
-    return jsonify(charts)
+@jwt_required
+def list_all(**kwargs):
+    email = kwargs.get('email') 
+    print(f"inside list_all: {email}")
+    user = User.query.filter_by(email=email).first() # Use .first() to retrieve a single User object
+    if user: # Check if user exists
+        charts = Chart.query.filter_by(user=user).all()
+        charts = charts_schema.dump(charts)
+        return jsonify(charts)
+    else:
+        return jsonify({'message': 'User not found'}), 404
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=add_next_day, trigger='cron', hour=0, minute=0)

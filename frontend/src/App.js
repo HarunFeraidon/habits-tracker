@@ -10,18 +10,28 @@ import { useJwt } from "react-jwt";
 function App() {
 
   const [charts, setCharts] = useState([]);
+  const [authToken, setAuthToken] = useState("");
 
-  useEffect(() => {
+  const fetchDataWithAuthToken = (authToken) => {
     fetch('/listall', {
-      'methods': 'GET',
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `${authToken}` // Use the stored authToken
       }
     })
       .then(resp => resp.json())
       .then(resp => setCharts(resp))
-      .catch(error => console.log(error))
-  }, [])
+      .catch(error => console.log(error));
+  };
+
+  // Call the function with the authToken when it's ready, e.g., in a useEffect hook
+  useEffect(() => {
+    // Check if authToken is ready (e.g., fetched, received from server, etc.)
+    if (authToken) {
+      fetchDataWithAuthToken(authToken);
+    }
+  }, [authToken]); // Update the effect whenever the authToken changes
 
   function handleCreate(title) {
     fetch(`/create/${title}`, {
@@ -63,8 +73,6 @@ function App() {
       });
   }
 
-  const [authToken, setAuthToken] = useState("");
-
   const responseMessage = (credentialResponse) => {
     var decoded = jwt_decode(credentialResponse.credential);
     console.log(decoded);
@@ -87,7 +95,7 @@ function App() {
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        console.log(typeof(data));
+        console.log(typeof (data));
         console.log("data.token: " + data.token)
         // authToken = data.token;
         setAuthToken(data.token)
@@ -98,7 +106,7 @@ function App() {
       })
   }
 
-  function printToken(){
+  function printToken() {
     console.log(authToken)
   }
 
@@ -109,15 +117,15 @@ function App() {
         'Authorization': `${authToken}` // Use the stored authToken
       }
     })
-    .then(response => {
-      response.json()
-    })
-    .then(response => {
-      console.log(response)
-    })
-    .catch(error => {
-      console.error(error);
-    });
+      .then(response => {
+        response.json()
+      })
+      .then(response => {
+        console.log(response)
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   return (
