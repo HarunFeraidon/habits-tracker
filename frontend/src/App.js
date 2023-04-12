@@ -9,59 +9,61 @@ import { useJwt } from "react-jwt";
 
 function App() {
 
-  // const [charts, setCharts] = useState([]);
+  const [charts, setCharts] = useState([]);
 
-  // useEffect(() => {
-  //   fetch('/listall', {
-  //     'methods': 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   })
-  //     .then(resp => resp.json())
-  //     .then(resp => setCharts(resp))
-  //     .catch(error => console.log(error))
-  // }, [])
+  useEffect(() => {
+    fetch('/listall', {
+      'methods': 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(resp => resp.json())
+      .then(resp => setCharts(resp))
+      .catch(error => console.log(error))
+  }, [])
 
-  // function handleCreate(title) {
-  //   fetch(`/create/${title}`, {
-  //     method: "POST",
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   })
-  //     .then(resp => resp.json())
-  //     .then(resp => addNewChart(resp))
-  //     .catch(error => {
-  //       console.error('There was a problem with the API call:', error);
-  //     });
-  // }
+  function handleCreate(title) {
+    fetch(`/create/${title}`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(resp => resp.json())
+      .then(resp => addNewChart(resp))
+      .catch(error => {
+        console.error('There was a problem with the API call:', error);
+      });
+  }
 
-  // function addNewChart(chart) {
-  //   console.log("Chart here: " + chart);
-  //   let chartsCopy = [...charts];
-  //   chartsCopy.push(chart)
-  //   setCharts(chartsCopy);
-  // }
+  function addNewChart(chart) {
+    console.log("Chart here: " + chart);
+    let chartsCopy = [...charts];
+    chartsCopy.push(chart)
+    setCharts(chartsCopy);
+  }
 
-  // function handleDelete(id) {
-  //   fetch(`/delete/${id}`, {
-  //     method: "DELETE",
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   })
-  //     .then(resp => resp.json())
-  //     .then(resp => {
-  //       if (resp.status === 204) {
-  //         const newCharts = charts.filter((chart) => chart.id !== id);
-  //         setCharts(newCharts);
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error('There was a problem with the API call:', error);
-  //     });
-  // }
+  function handleDelete(id) {
+    fetch(`/delete/${id}`, {
+      method: "DELETE",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(resp => resp.json())
+      .then(resp => {
+        if (resp.status === 204) {
+          const newCharts = charts.filter((chart) => chart.id !== id);
+          setCharts(newCharts);
+        }
+      })
+      .catch(error => {
+        console.error('There was a problem with the API call:', error);
+      });
+  }
+
+  const [authToken, setAuthToken] = useState("");
 
   const responseMessage = (credentialResponse) => {
     var decoded = jwt_decode(credentialResponse.credential);
@@ -72,7 +74,7 @@ function App() {
     console.log(error);
   };
 
-  let authToken = '';
+  // let authToken = '';
 
   function createUser(email) {
     const formData = new FormData()
@@ -87,7 +89,9 @@ function App() {
         console.log(data);
         console.log(typeof(data));
         console.log("data.token: " + data.token)
-        authToken = data.token;
+        // authToken = data.token;
+        setAuthToken(data.token)
+        localStorage.setItem('authToken', authToken);
       })
       .catch(error => {
         console.error(error)
@@ -100,7 +104,7 @@ function App() {
 
   function fetchAuthenticatedData() {
     // Use the authToken in the headers of authenticated requests
-    fetch('/authenticated_route', {
+    fetch('/api/protected', {
       headers: {
         'Authorization': `${authToken}` // Use the stored authToken
       }
@@ -136,6 +140,26 @@ function App() {
       <div className="container text-center">
         <ChartsList charts={charts} handleDelete={handleDelete} />
       </div> */}
+      {/* Conditionally render content based on authToken */}
+      {authToken ? (
+        <div className="container text-center">
+          <div className="row justify-content-md-center">
+            <h4>Track Your Goals</h4>
+          </div>
+          <div className="row ">
+            {/* Render TextForm component */}
+            <TextForm submitFunction={handleCreate} />
+          </div>
+        </div>
+      ) : null}
+
+      {/* Conditionally render content based on authToken */}
+      {authToken ? (
+        <div className="container text-center">
+          {/* Render ChartsList component */}
+          <ChartsList charts={charts} handleDelete={handleDelete} />
+        </div>
+      ) : null}
     </div>
   );
 }

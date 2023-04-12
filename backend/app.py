@@ -8,6 +8,7 @@ from flask_cors import CORS
 from flask_login import LoginManager, current_user, login_required, login_user, UserMixin
 import json
 import jwt
+from functools import wraps
 
 from datetime import date, datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -127,6 +128,34 @@ def decode_jwt(token):
     except jwt.InvalidTokenError:
         # Handle invalid token
         return None
+
+def jwt_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('Authorization')  # Get JWT token from request headers
+        print(f"token: {token}")
+        if token:
+            decoded_token = decode_jwt(token)  # Decode and verify JWT token
+            print(decoded_token)
+            print(f"type(decoded_token) {decoded_token}")
+            if decoded_token:
+                # Token is valid, continue processing the route
+                email = decoded_token['email']
+                # print(email)
+                # Retrieve user information based on the email or other identifier
+                # ... (your code here)
+                print("Authenticated route: Hello, {}".format(email))
+            return f(*args, **kwargs)
+        return jsonify({'error': 'Authentication failed.'}), 401
+    return decorated_function
+
+# Example of a protected route using the 'jwt_required' decorator
+@app.route('/api/protected')
+@jwt_required  # Apply 'jwt_required' decorator to protect this route
+def protected_route():
+    print("ligma ligma ligma")
+    return jsonify({'message': 'This is a protected route. Authentication successful.'})
+
 
 # Example route using JWT authentication
 @app.route('/authenticated_route')
