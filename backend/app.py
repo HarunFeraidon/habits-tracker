@@ -1,4 +1,5 @@
 import os
+import random
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request, url_for, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -52,6 +53,16 @@ class Chart(db.Model):
         data_list = []
         data_list.append({"value": 0, "day": date.today().strftime("%Y-%m-%d")})
         return json.dumps(data_list)
+    
+    def sample_data(self):
+        data_list = []
+        reference_year = date.today().year
+        day = datetime(reference_year, 1, 1)
+        today = datetime.now().date()
+        while day.date() != today:
+            data_list.append({"value": random.choice([0, 1]), "day": day.strftime("%Y-%m-%d")})
+            day += timedelta(days=1)
+        self.data = json.dumps(data_list)
 
     def complete_today(self):
         all_data = json.loads(self.data)
@@ -162,13 +173,32 @@ def inspect(id):
 @jwt_required
 def create_chart(title, **kwargs):
     email = kwargs.get("email")
-    print(f"inside create_chart: {email}")
     new_chart = Chart(title=str(title))
     print(new_chart)
     user = User.query.filter_by(
         email=email
     ).first()  # Use .first() to retrieve a single User object
     print(user)
+    new_chart.user = user
+    try:
+        db.session.add(new_chart)
+        db.session.commit()
+        return chart_schema.jsonify(new_chart)
+    except Exception as e:
+        return f"something went wrong in create_task(): {e}"
+
+
+@app.route("/create_sample/<title>", methods=["POST"])
+# @login_required
+@jwt_required
+def create_sample_chart(title, **kwargs):
+    email = kwargs.get("email")
+    print(f"inside create_sample_chart: {email}")
+    new_chart = Chart(title=str(title))
+    new_chart.sample_data()
+    user = User.query.filter_by(
+        email=email
+    ).first()  # Use .first() to retrieve a single User object
     new_chart.user = user
     try:
         db.session.add(new_chart)

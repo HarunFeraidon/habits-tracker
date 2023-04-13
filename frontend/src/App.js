@@ -48,6 +48,21 @@ function App() {
       });
   }
 
+  function handleCreateSample(title) {
+    fetch(`/create_sample/${title}`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${authToken}` // Use the stored authToken
+      }
+    })
+      .then(resp => resp.json())
+      .then(resp => addNewChart(resp))
+      .catch(error => {
+        console.error('There was a problem with the API call:', error);
+      });
+  }
+
   function addNewChart(chart) {
     let chartsCopy = [...charts];
     chartsCopy.push(chart)
@@ -115,7 +130,7 @@ function App() {
           <button onClick={handleLogout} className="btn btn-outline-dark">Sign out</button>
           <div className="row ">
             {/* Render TextForm component */}
-            <TextForm submitFunction={handleCreate} />
+            <TextForm submitFunction={handleCreate} sampleSubmitFunction={handleCreateSample} />
           </div>
         </div>
       ) : (

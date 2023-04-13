@@ -13,8 +13,14 @@ function TextForm(props) {
         props.submitFunction(text);
     }
 
+    function handleSampleSubmit(event) {
+        event.preventDefault();
+        console.log(`Text submitted: ${text}`);
+        props.sampleSubmitFunction(text);
+    }
+
     return (
-        <form onSubmit={handleSubmit}>
+        <form>
             <label htmlFor="text-input">Create a chart:</label>
             <input
                 id="text-input"
@@ -23,7 +29,20 @@ function TextForm(props) {
                 onChange={handleChange}
                 placeholder="What is your goal?"
             />
-            <button className='btn btn-primary primary-button' type="submit">Submit</button>
+            <button
+                className="btn btn-primary primary-button"
+                type="submit"
+                onClick={handleSubmit}
+            >
+                Create Fresh Chart
+            </button>
+            <button
+                className="btn btn-primary primary-button"
+                type="submit"
+                onClick={handleSampleSubmit}
+            >
+                Create Randomly Populated Chart
+            </button>
         </form>
     );
 }
