@@ -4,12 +4,13 @@ import ChartsList from './components/ChartsList';
 import TextForm from './components/TextForm';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from "jwt-decode";
+import Cookies from 'js-cookie';
 
 
 function App() {
 
   const [charts, setCharts] = useState([]);
-  const [authToken, setAuthToken] = useState("");
+  const [authToken, setAuthToken] = useState(Cookies.get("authToken"));
 
   const fetchDataWithAuthToken = (authToken) => {
     fetch('/listall', {
@@ -91,6 +92,7 @@ function App() {
       .then(response => response.json())
       .then(data => {
         setAuthToken(data.token)
+        Cookies.set('authToken', data.token, { expires: 1/48 }); // expires 30 minutes
       })
       .catch(error => {
         console.error(error)
@@ -98,18 +100,19 @@ function App() {
   }
 
   function handleLogout(){
-    setAuthToken("") // resets authToken
+    setAuthToken("") // resets authToken state
+    Cookies.remove('authToken');
   }
 
   return (
     <div className="App">
 
-      {authToken ? (
+      {Cookies.get("authToken") ? (
         <div className="container text-center">
           <div className="row justify-content-md-center">
             <h4>Track Your Goals</h4>
           </div>
-          <button onClick={handleLogout}>Sign out</button>
+          <button onClick={handleLogout} className="btn btn-danger">Sign out</button>
           <div className="row ">
             {/* Render TextForm component */}
             <TextForm submitFunction={handleCreate} />
@@ -128,7 +131,7 @@ function App() {
       )}
 
       {/* Conditionally render content based on authToken */}
-      {authToken ? (
+      {Cookies.get("authToken") ? (
         <div className="container text-center">
           {/* Render ChartsList component */}
           <ChartsList charts={charts} handleDelete={handleDelete} />
