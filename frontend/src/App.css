@@ -4,3 +4,23 @@
   color: black;
   padding:20px;
 }
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  margin-bottom: 2px;
+}
+
+.subtle-text {
+  font-size: 14px;
+  color: #777;
+}
+
+.welcome {
+  margin-bottom: 0; /* Remove margin-bottom */
+}

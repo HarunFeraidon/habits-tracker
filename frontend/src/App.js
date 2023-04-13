@@ -48,7 +48,6 @@ function App() {
   }
 
   function addNewChart(chart) {
-    console.log("Chart here: " + chart);
     let chartsCopy = [...charts];
     chartsCopy.push(chart)
     setCharts(chartsCopy);
@@ -75,7 +74,6 @@ function App() {
 
   const responseMessage = (credentialResponse) => {
     var decoded = jwt_decode(credentialResponse.credential);
-    console.log(decoded);
     createUser(decoded.email)
   };
   const errorMessage = (error) => {
@@ -92,59 +90,42 @@ function App() {
     })
       .then(response => response.json())
       .then(data => {
-        console.log(data);
-        console.log(typeof (data));
-        console.log("data.token: " + data.token)
         setAuthToken(data.token)
-        localStorage.setItem('authToken', authToken);
       })
       .catch(error => {
         console.error(error)
       })
   }
 
-  function printToken() {
-    console.log(authToken)
-  }
-
-  function fetchAuthenticatedData() {
-    // Use the authToken in the headers of authenticated requests
-    fetch('/api/protected', {
-      headers: {
-        'Authorization': `${authToken}` // Use the stored authToken
-      }
-    })
-      .then(response => {
-        response.json()
-      })
-      .then(response => {
-        console.log(response)
-      })
-      .catch(error => {
-        console.error(error);
-      });
+  function handleLogout(){
+    setAuthToken("") // resets authToken
   }
 
   return (
     <div className="App">
-      <GoogleLogin
-        onSuccess={responseMessage}
-        onError={errorMessage}
-      />;
-      <button onClick={printToken}>Click here</button>
-      <button onClick={fetchAuthenticatedData}>authenticated_route here</button>
 
       {authToken ? (
         <div className="container text-center">
           <div className="row justify-content-md-center">
             <h4>Track Your Goals</h4>
           </div>
+          <button onClick={handleLogout}>Sign out</button>
           <div className="row ">
             {/* Render TextForm component */}
             <TextForm submitFunction={handleCreate} />
           </div>
         </div>
-      ) : null}
+      ) : (
+          <div class="container">
+            <h3 class="text-center">Welcome to your daily Habits Tracker</h3>
+            <p class="text-center welcome">To get started, authenticate through your Google account.</p>
+            <p class="text-center subtle-text welcome">Don't worry, the only information used is your email account, to create yourself a unique account</p>
+            <GoogleLogin
+              onSuccess={responseMessage}
+              onError={errorMessage}
+            />
+          </div>
+      )}
 
       {/* Conditionally render content based on authToken */}
       {authToken ? (
