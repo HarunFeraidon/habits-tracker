@@ -33,8 +33,9 @@ function App() {
     }
   }, [authToken]); // Update the effect whenever the authToken changes
 
-  function handleCreate(title) {
-    fetch(`/create/${title}`, {
+  function handleCreate(title, isSample) {
+    let route = isSample ? `/create_sample/${title}` : `/create/${title}`;
+    fetch(route, {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ function App() {
           <button onClick={handleLogout} className="btn btn-outline-dark">Sign out</button>
           <div className="row ">
             {/* Render TextForm component */}
-            <TextForm submitFunction={handleCreate} sampleSubmitFunction={handleCreateSample} />
+            <TextForm submitFunction={handleCreate} />
           </div>
         </div>
       ) : (
