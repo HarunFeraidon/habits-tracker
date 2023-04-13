@@ -9,7 +9,7 @@ function ChartsList(props) {
         setItems(props.charts);
     }, [props.charts])
 
-    function handleDelete(id){
+    function handleDelete(id) {
         props.handleDelete(id);
     }
 
