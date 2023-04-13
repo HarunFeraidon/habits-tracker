@@ -4,12 +4,13 @@ import ChartsList from './components/ChartsList';
 import TextForm from './components/TextForm';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from "jwt-decode";
+import Cookies from 'js-cookie';
 
 
 function App() {
 
   const [charts, setCharts] = useState([]);
-  const [authToken, setAuthToken] = useState("");
+  const [authToken, setAuthToken] = useState(Cookies.get("authToken"));
 
   const fetchDataWithAuthToken = (authToken) => {
     fetch('/listall', {
@@ -48,7 +49,6 @@ function App() {
   }
 
   function addNewChart(chart) {
-    console.log("Chart here: " + chart);
     let chartsCopy = [...charts];
     chartsCopy.push(chart)
     setCharts(chartsCopy);
@@ -75,7 +75,6 @@ function App() {
 
   const responseMessage = (credentialResponse) => {
     var decoded = jwt_decode(credentialResponse.credential);
-    console.log(decoded);
     createUser(decoded.email)
   };
   const errorMessage = (error) => {
@@ -92,62 +91,49 @@ function App() {
     })
       .then(response => response.json())
       .then(data => {
-        console.log(data);
-        console.log(typeof (data));
-        console.log("data.token: " + data.token)
         setAuthToken(data.token)
-        localStorage.setItem('authToken', authToken);
+        Cookies.set('authToken', data.token, { expires: 1/48 }); // expires 30 minutes
       })
       .catch(error => {
         console.error(error)
       })
   }
 
-  function printToken() {
-    console.log(authToken)
-  }
-
-  function fetchAuthenticatedData() {
-    // Use the authToken in the headers of authenticated requests
-    fetch('/api/protected', {
-      headers: {
-        'Authorization': `${authToken}` // Use the stored authToken
-      }
-    })
-      .then(response => {
-        response.json()
-      })
-      .then(response => {
-        console.log(response)
-      })
-      .catch(error => {
-        console.error(error);
-      });
+  function handleLogout(){
+    setAuthToken("") // resets authToken state
+    Cookies.remove('authToken');
   }
 
   return (
     <div className="App">
-      <GoogleLogin
-        onSuccess={responseMessage}
-        onError={errorMessage}
-      />;
-      <button onClick={printToken}>Click here</button>
-      <button onClick={fetchAuthenticatedData}>authenticated_route here</button>
 
-      {authToken ? (
+      {Cookies.get("authToken") ? (
         <div className="container text-center">
           <div className="row justify-content-md-center">
-            <h4>Track Your Goals</h4>
+            <h3>Daily Habits Tracker</h3>
           </div>
+          <button onClick={handleLogout} className="btn btn-outline-dark">Sign out</button>
           <div className="row ">
             {/* Render TextForm component */}
             <TextForm submitFunction={handleCreate} />
           </div>
         </div>
-      ) : null}
+      ) : (
+          <div class="container">
+            <h1 class="text-center">Daily Habits Tracker</h1> <br />
+            <p class=" welcome">To get started, authenticate through your Google account.</p>
+            <p class="subtle-text welcome">The only information used is your email address, to ensure a unique profile</p>
+            <div class="text-center">
+              <GoogleLogin
+                onSuccess={responseMessage}
+                onError={errorMessage}
+              />
+            </div>
+          </div>
+      )}
 
       {/* Conditionally render content based on authToken */}
-      {authToken ? (
+      {Cookies.get("authToken") ? (
         <div className="container text-center">
           {/* Render ChartsList component */}
           <ChartsList charts={charts} handleDelete={handleDelete} />

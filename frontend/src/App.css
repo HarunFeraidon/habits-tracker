@@ -1,6 +1,37 @@
 .App {
-  background-color: white;
+  background-color: #ADC4DD;
+  font-family: Helvetica;
   min-height: 100vh;
-  color: black;
+  color: white;
   padding:20px;
+}
+
+/* body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+} */
+
+.container {
+  margin-bottom: 10px;
+}
+
+.subtle-text {
+  font-size: 14px;
+  color: #777;
+}
+
+.welcome {
+  margin-bottom: 0; /* Remove margin-bottom */
+}
+
+h1 {
+  display: inline;
+  border-bottom: 3px solid #7B9FCF;
+}
+
+.primary-button {
+  background-color: #4c76ad !important;
+  margin: 2px;
 }

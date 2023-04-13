@@ -15,14 +15,15 @@ function TextForm(props) {
 
     return (
         <form onSubmit={handleSubmit}>
-            <label htmlFor="text-input">Enter some text:</label>
+            <label htmlFor="text-input">Create a chart:</label>
             <input
                 id="text-input"
                 type="text"
                 value={text}
                 onChange={handleChange}
+                placeholder="What is your goal?"
             />
-            <button className='btn btn-primary' type="submit">Submit</button>
+            <button className='btn btn-primary primary-button' type="submit">Submit</button>
         </form>
     );
 }
