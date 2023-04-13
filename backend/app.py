@@ -34,6 +34,42 @@ class User(db.Model):
     charts = db.relationship("Chart", backref="user", lazy=True)
 
 
+# Function to decode and verify JWT token
+def decode_jwt(token):
+    try:
+        # Decode and verify JWT token using secret key
+        payload = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        # Handle expired token
+        return None
+    except jwt.InvalidTokenError:
+        # Handle invalid token
+        return None
+
+
+def jwt_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get(
+            "Authorization"
+        )  # Get JWT token from request headers
+        print(f"token: {token}")
+        if token:
+            decoded_token = decode_jwt(token)  # Decode and verify JWT token
+            print(decoded_token)
+            print(f"type(decoded_token) {decoded_token}")
+            if decoded_token:
+                # Token is valid, continue processing the route
+                email = decoded_token["email"]
+                kwargs["email"] = email
+                print("Authenticated route: Hello, {}".format(email))
+            return f(*args, **kwargs)
+        return jsonify({"error": "Authentication failed."}), 401
+
+    return decorated_function
+
+
 class Chart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
@@ -53,14 +89,16 @@ class Chart(db.Model):
         data_list = []
         data_list.append({"value": 0, "day": date.today().strftime("%Y-%m-%d")})
         return json.dumps(data_list)
-    
+
     def sample_data(self):
         data_list = []
         reference_year = date.today().year
         day = datetime(reference_year, 1, 1)
         today = datetime.now().date()
         while day.date() != today:
-            data_list.append({"value": random.choice([0, 1]), "day": day.strftime("%Y-%m-%d")})
+            data_list.append(
+                {"value": random.choice([0, 1]), "day": day.strftime("%Y-%m-%d")}
+            )
             day += timedelta(days=1)
         self.data = json.dumps(data_list)
 
@@ -126,48 +164,6 @@ def create_user():
         )
 
 
-# Function to decode and verify JWT token
-def decode_jwt(token):
-    try:
-        # Decode and verify JWT token using secret key
-        payload = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        # Handle expired token
-        return None
-    except jwt.InvalidTokenError:
-        # Handle invalid token
-        return None
-
-
-def jwt_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.headers.get(
-            "Authorization"
-        )  # Get JWT token from request headers
-        print(f"token: {token}")
-        if token:
-            decoded_token = decode_jwt(token)  # Decode and verify JWT token
-            print(decoded_token)
-            print(f"type(decoded_token) {decoded_token}")
-            if decoded_token:
-                # Token is valid, continue processing the route
-                email = decoded_token["email"]
-                kwargs["email"] = email
-                print("Authenticated route: Hello, {}".format(email))
-            return f(*args, **kwargs)
-        return jsonify({"error": "Authentication failed."}), 401
-
-    return decorated_function
-
-
-@app.route("/inspect/<int:id>", methods=["GET"])
-def inspect(id):
-    chart = Chart.query.get_or_404(id)
-    return chart.data
-
-
 @app.route("/create/<title>", methods=["POST"])
 # @login_required
 @jwt_required
@@ -208,20 +204,7 @@ def create_sample_chart(title, **kwargs):
         return f"something went wrong in create_task(): {e}"
 
 
-@app.route("/create_bf", methods=["POST"])
-def create_bf():
-    new_chart = Chart(title=request.json["title"])
-    new_chart.data = json.dumps(request.json["data"])
-    try:
-        db.session.add(new_chart)
-        db.session.commit()
-        return chart_schema.jsonify(new_chart)
-    except Exception as e:
-        return f"something went wrong in create_task(): {e}"
-
-
 @app.route("/delete/<int:id>", methods=["DELETE"])
-# @login_required
 def delete_chart(id):
     chart_to_delete = Chart.query.get_or_404(id)
     try:
@@ -240,21 +223,6 @@ def mark_complete(id):
     return {"data": chart.data}
 
 
-def add_next_day():
-    # This function will be triggered every day at midnight
-    with app.app_context():
-        charts = Chart.query.all()
-        for chart in charts:
-            chart.append_day()
-        db.session.commit()
-
-
-@app.route("/get/<int:id>", methods=["GET"])
-def getChart(id):
-    chart = Chart.query.get_or_404(id)
-    return chart_schema.jsonify(chart)
-
-
 @app.route("/listall")
 @jwt_required
 def list_all(**kwargs):
@@ -267,6 +235,15 @@ def list_all(**kwargs):
         return jsonify(charts)
     else:
         return jsonify({"message": "User not found"}), 404
+
+
+def add_next_day():
+    # This function will be triggered every day at midnight
+    with app.app_context():
+        charts = Chart.query.all()
+        for chart in charts:
+            chart.append_day()
+        db.session.commit()
 
 
 scheduler = BackgroundScheduler()
