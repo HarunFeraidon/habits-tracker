@@ -110,9 +110,9 @@ function App() {
       {Cookies.get("authToken") ? (
         <div className="container text-center">
           <div className="row justify-content-md-center">
-            <h4>Track Your Goals</h4>
+            <h3>Daily Habits Tracker</h3>
           </div>
-          <button onClick={handleLogout} className="btn btn-danger">Sign out</button>
+          <button onClick={handleLogout} className="btn btn-outline-dark">Sign out</button>
           <div className="row ">
             {/* Render TextForm component */}
             <TextForm submitFunction={handleCreate} />
@@ -120,13 +120,15 @@ function App() {
         </div>
       ) : (
           <div class="container">
-            <h3 class="text-center">Welcome to your daily Habits Tracker</h3>
-            <p class="text-center welcome">To get started, authenticate through your Google account.</p>
-            <p class="text-center subtle-text welcome">Don't worry, the only information used is your email account, to create yourself a unique account</p>
-            <GoogleLogin
-              onSuccess={responseMessage}
-              onError={errorMessage}
-            />
+            <h1 class="text-center">Daily Habits Tracker</h1> <br />
+            <p class=" welcome">To get started, authenticate through your Google account.</p>
+            <p class="subtle-text welcome">The only information used is your email address, to ensure a unique profile</p>
+            <div class="text-center">
+              <GoogleLogin
+                onSuccess={responseMessage}
+                onError={errorMessage}
+              />
+            </div>
           </div>
       )}
 

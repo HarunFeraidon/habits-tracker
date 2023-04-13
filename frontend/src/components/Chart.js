@@ -31,11 +31,11 @@ function Chart(props) {
                         <h3>{props.title}</h3>
                     </div>
                     <div className="col-12">
-                        <button className='btn btn-primary'
+                        <button className='btn btn-primary primary-button'
                             onClick={() => handleUpdate(props.id)}> Complete today</button>
                     </div>
                     <div className="col-12">
-                        <button className='btn btn-primary'
+                        <button className='btn btn-primary primary-button'
                             onClick={() => handleDelete(props.id)}> Delete Chart</button>
                     </div>
                 </div>
