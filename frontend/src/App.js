@@ -4,7 +4,6 @@ import ChartsList from './components/ChartsList';
 import TextForm from './components/TextForm';
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from "jwt-decode";
-import { useJwt } from "react-jwt";
 
 
 function App() {
@@ -83,8 +82,6 @@ function App() {
     console.log(error);
   };
 
-  // let authToken = '';
-
   function createUser(email) {
     const formData = new FormData()
     formData.append('email', email)
@@ -98,7 +95,6 @@ function App() {
         console.log(data);
         console.log(typeof (data));
         console.log("data.token: " + data.token)
-        // authToken = data.token;
         setAuthToken(data.token)
         localStorage.setItem('authToken', authToken);
       })
@@ -137,19 +133,7 @@ function App() {
       />;
       <button onClick={printToken}>Click here</button>
       <button onClick={fetchAuthenticatedData}>authenticated_route here</button>
-      {/* <div className="container text-center">
-        <div className="row justify-content-md-center">
-          
-          <h4>Track Your Goals</h4>
-        </div>
-        <div className="row ">
-          <TextForm submitFunction={handleCreate} />
-        </div>
-      </div>
-      <div className="container text-center">
-        <ChartsList charts={charts} handleDelete={handleDelete} />
-      </div> */}
-      {/* Conditionally render content based on authToken */}
+
       {authToken ? (
         <div className="container text-center">
           <div className="row justify-content-md-center">
