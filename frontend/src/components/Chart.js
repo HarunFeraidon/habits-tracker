@@ -5,6 +5,11 @@ function Chart(props) {
 
     const [data, setData] = useState(props.data)
 
+    /**
+     * updates Chart by calling flask route to mark most recent day on Chart object complete
+     * @param {int} id - id of specific Chart to update
+     * @returns None
+     */
     function handleUpdate(id) {
         fetch(`/finish/${id}`, {
             method: "POST",
