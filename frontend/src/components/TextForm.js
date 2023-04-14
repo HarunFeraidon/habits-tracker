@@ -19,8 +19,6 @@ function TextForm(props) {
      */
     function handleSubmit(event, isSample) {
         event.preventDefault();
-        console.log(props.submitFunction);
-        console.log(`isSample: ${isSample}`);
         props.submitFunction(text, isSample);
     }
 
