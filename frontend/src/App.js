@@ -103,8 +103,6 @@ function App() {
    * @returns None
    */
   const responseMessage = (credentialResponse) => {
-    console.log("typeof(credentialResponse)")
-    console.log(typeof (credentialResponse))
     var decoded = jwt_decode(credentialResponse.credential);
     createUser(decoded.email)
   };
