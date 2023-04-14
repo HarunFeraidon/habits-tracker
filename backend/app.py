@@ -36,6 +36,15 @@ class User(db.Model):
 
 # Function to decode and verify JWT token
 def decode_jwt(token):
+    """
+    Function to decode and verify JWT token
+
+    Args:
+        token (str): hashed string representing a token
+
+    Returns:
+        dict: dict with token decoded
+    """
     try:
         # Decode and verify JWT token using secret key
         payload = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
@@ -54,11 +63,8 @@ def jwt_required(f):
         token = request.headers.get(
             "Authorization"
         )  # Get JWT token from request headers
-        print(f"token: {token}")
         if token:
             decoded_token = decode_jwt(token)  # Decode and verify JWT token
-            print(decoded_token)
-            print(f"type(decoded_token) {decoded_token}")
             if decoded_token:
                 # Token is valid, continue processing the route
                 email = decoded_token["email"]
@@ -91,23 +97,34 @@ class Chart(db.Model):
         return json.dumps(data_list)
 
     def sample_data(self):
+        """
+        Populates Chart object's data with random data from Jan. 1 to current day
+        """
         data_list = []
         reference_year = date.today().year
         day = datetime(reference_year, 1, 1)
         today = datetime.now().date()
-        while day.date() != today:
+        bias_towards_1 = random.random()
+        while day.date() <= today:
+            value = random.choices([0, 1], weights=[1-bias_towards_1, bias_towards_1])[0]
             data_list.append(
-                {"value": random.choice([0, 1]), "day": day.strftime("%Y-%m-%d")}
+                {"value": value, "day": day.strftime("%Y-%m-%d")}
             )
             day += timedelta(days=1)
         self.data = json.dumps(data_list)
 
     def complete_today(self):
+        """
+        Trigged when user opts to 'complete' today
+        """
         all_data = json.loads(self.data)
         all_data[-1]["value"] = 1
         self.data = json.dumps(all_data)
 
     def append_day(self):
+        """
+        Adds another day to Chart object's data
+        """
         all_data = json.loads(self.data)
         all_data.append({"value": 0, "day": datetime.now().strftime("%Y-%m-%d")})
         if date.today().year != self.year_end:
@@ -127,6 +144,14 @@ charts_schema = ChartSchema(many=True)
 
 @app.route("/create_user", methods=["POST"])
 def create_user():
+    """
+    Route to authenticate or create a new user.
+    It is called upon after user signs in via Google
+    Args:
+        None
+    Returns:
+        tuple: a Response object and HTTP status code
+    """
     email = request.form["email"]
     user = User.query.filter_by(email=email).first()
     token = jwt.encode(
@@ -168,6 +193,14 @@ def create_user():
 # @login_required
 @jwt_required
 def create_chart(title, **kwargs):
+    """
+    Authentication required, this function creates a Chart object for the user
+    Args:
+        title (str): the title of the new Chart
+        email (str): will be used to bond chart to user
+    Returns:
+        dict: includes created Chart object if successful
+    """
     email = kwargs.get("email")
     new_chart = Chart(title=str(title))
     print(new_chart)
@@ -181,13 +214,22 @@ def create_chart(title, **kwargs):
         db.session.commit()
         return chart_schema.jsonify(new_chart)
     except Exception as e:
-        return f"something went wrong in create_task(): {e}"
+        return jsonify({"error": f"something went wrong in create_task(): {e}"})
+
 
 
 @app.route("/create_sample/<title>", methods=["POST"])
 # @login_required
 @jwt_required
 def create_sample_chart(title, **kwargs):
+    """
+    This also creates a chart, the difference is that it will populate with random data.
+    Args:
+        title (str): the title of the new Chart
+        email (str): will be used to bond chart to user
+    Returns:
+        dict: includes created Chart object if successful
+    """
     email = kwargs.get("email")
     print(f"inside create_sample_chart: {email}")
     new_chart = Chart(title=str(title))
@@ -201,11 +243,18 @@ def create_sample_chart(title, **kwargs):
         db.session.commit()
         return chart_schema.jsonify(new_chart)
     except Exception as e:
-        return f"something went wrong in create_task(): {e}"
+        return jsonify({"error": f"something went wrong in create_task(): {e}"})
 
 
 @app.route("/delete/<int:id>", methods=["DELETE"])
 def delete_chart(id):
+    """
+    Will delete the specified Chart object
+    Args:
+        id (int): the id of the Chart to delete
+    Returns:
+        dict: dict with http response
+    """
     chart_to_delete = Chart.query.get_or_404(id)
     try:
         db.session.delete(chart_to_delete)
@@ -217,6 +266,13 @@ def delete_chart(id):
 
 @app.route("/finish/<int:id>", methods=["POST"])
 def mark_complete(id):
+    """
+    Will update the input Chart object to "complete" today
+    Args:
+        id (int): the id of the Chart to update
+    Returns:
+        dict: dict with updated data of Chart, to render on front end
+    """
     chart = Chart.query.get_or_404(id)
     chart.complete_today()
     db.session.commit()
@@ -226,6 +282,13 @@ def mark_complete(id):
 @app.route("/listall")
 @jwt_required
 def list_all(**kwargs):
+    """
+    gets and returns all list belonging to a user
+    Args:
+        email (str): email to find all Charts bonded to User object
+    Returns:
+        dict: dict with updated data of Chart, to render on front end
+    """
     email = kwargs.get("email")
     print(f"inside list_all: {email}")
     user = User.query.filter_by(email=email).first()
@@ -234,11 +297,17 @@ def list_all(**kwargs):
         charts = charts_schema.dump(charts)
         return jsonify(charts)
     else:
-        return jsonify({"message": "User not found"}), 404
+        return jsonify({"message": "User not found"})
 
 
 def add_next_day():
-    # This function will be triggered every day at midnight
+    """
+    this function will be triggered everyday, at midnight, to move the Chart object forward
+    Args:
+        None
+    Returns:
+        None
+    """
     with app.app_context():
         charts = Chart.query.all()
         for chart in charts:
