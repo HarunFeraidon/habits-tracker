@@ -1,5 +1,5 @@
 # Habits Tracker
-![Imgur](https://imgur.com/a/LXFLXX6.gif)
+![Imgur](https://i.imgur.com/a/LXFLXX6.gif)
 
 ## What is it
 Keep track of your daily goals or help build your habits by using GitHub style contribution charts.
@@ -15,5 +15,5 @@ Authentication is handled via [Google](https://developers.google.com/identity/gs
 2. Because we want you to be able to create charts, your email you authenticated with is stored to create an account.
 3. No other items are stored or even accessed/viewed.
 
-<img src="https://imgur.com/a/dbA5tdx.png"  width="40%" height="40%">
+<img src="i.https://imgur.com/a/dbA5tdx.png"  width="40%" height="40%">
 
