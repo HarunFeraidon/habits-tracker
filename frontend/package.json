@@ -4,6 +4,8 @@
   "private": true,
   "proxy": "http://127.0.0.1:5000",
   "dependencies": {
+    "@nivo/calendar": "^0.80.0",
+    "@nivo/colors": "^0.80.0",
     "@nivo/core": "^0.80.0",
     "@react-oauth/google": "^0.9.0",
     "@testing-library/jest-dom": "^5.16.5",
