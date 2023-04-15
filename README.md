@@ -1,5 +1,5 @@
 # Habits Tracker
-<img src="https://imgur.com/QNDKC2M.gif"  width="55%" height="55%">
+![Imgur](https://imgur.com/QNDKC2M.gif)
 
 
 ## What is it
