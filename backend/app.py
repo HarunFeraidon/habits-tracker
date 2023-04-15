@@ -58,6 +58,9 @@ def decode_jwt(token):
 
 
 def jwt_required(f):
+    """
+    Decorator that takes care or authentication
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.headers.get(
