@@ -241,6 +241,11 @@ def add_next_day():
             chart.append_day()
         db.session.commit()
 
+@app.route("/")
+def home():
+    return "Welcome to My Flask Application!"
+
+
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=add_next_day, trigger="cron", hour=0, minute=0)
@@ -248,4 +253,4 @@ scheduler.start()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
