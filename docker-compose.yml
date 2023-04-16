@@ -1,18 +1,14 @@
 version: '3'
 services:
   backend:
-    build:
-      context: ./  # Use the root directory as the build context for Flask backend
-      dockerfile: Dockerfile-backend  # Specify the Dockerfile for backend
+    build: ./backend  # Update to backend directory as build context for Flask backend
     ports:
       - "5000:5000"  # Expose port 5000 for Flask backend
     networks:
       - my_network  # Connect to the Docker network named my_network
 
   frontend:
-    build:
-      context: ./  # Use the root directory as the build context for React frontend
-      dockerfile: Dockerfile-frontend  # Specify the Dockerfile for frontend
+    build: ./frontend  # Update to frontend directory as build context for React frontend
     ports:
       - "3000:3000"  # Expose port 3000 for React frontend
     links:
