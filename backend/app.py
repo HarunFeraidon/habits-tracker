@@ -1,21 +1,17 @@
 import os
-import random
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, url_for, render_template, redirect
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_marshmallow import Marshmallow
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-import json
 import jwt
 from functools import wraps
-
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
+
+from models import db, migrate, User, Chart
+from schemas import ma, chart_schema, charts_schema
 
 app = Flask(__name__)
 CORS(app)
-
 
 load_dotenv()
 
@@ -23,15 +19,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:@localhost/habits_
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-ma = Marshmallow(app)
-
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50), unique=True, nullable=False)
-    charts = db.relationship("Chart", backref="user", lazy=True)
+db.init_app(app)
+migrate.init_app(app, db)
+ma.init_app(app)
 
 
 # Function to decode and verify JWT token
@@ -61,6 +51,7 @@ def jwt_required(f):
     """
     Decorator that takes care or authentication
     """
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.headers.get(
@@ -77,72 +68,6 @@ def jwt_required(f):
         return jsonify({"error": "Authentication failed."}), 401
 
     return decorated_function
-
-
-class Chart(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50), nullable=False)
-    year_start = db.Column(db.Date)
-    year_end = db.Column(db.Date)
-    data = db.Column(db.JSON)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-
-    def __init__(self, title):
-        self.title = title
-        reference_year = date.today().year
-        self.year_start = datetime(reference_year, 1, 1)
-        self.year_end = datetime(reference_year, 12, 31)
-        self.data = self.init_data()
-
-    def init_data(self):
-        data_list = []
-        data_list.append({"value": 0, "day": date.today().strftime("%Y-%m-%d")})
-        return json.dumps(data_list)
-
-    def sample_data(self):
-        """
-        Populates Chart object's data with random data from Jan. 1 to current day
-        """
-        data_list = []
-        reference_year = date.today().year
-        day = datetime(reference_year, 1, 1)
-        today = datetime.now().date()
-        bias_towards_1 = random.random()
-        while day.date() <= today:
-            value = random.choices([0, 1], weights=[1-bias_towards_1, bias_towards_1])[0]
-            data_list.append(
-                {"value": value, "day": day.strftime("%Y-%m-%d")}
-            )
-            day += timedelta(days=1)
-        self.data = json.dumps(data_list)
-
-    def complete_today(self):
-        """
-        Trigged when user opts to 'complete' today
-        """
-        all_data = json.loads(self.data)
-        all_data[-1]["value"] = 1
-        self.data = json.dumps(all_data)
-
-    def append_day(self):
-        """
-        Adds another day to Chart object's data
-        """
-        all_data = json.loads(self.data)
-        all_data.append({"value": 0, "day": datetime.now().strftime("%Y-%m-%d")})
-        if date.today().year != self.year_end:
-            reference_year = date.today().year
-            self.year_end = datetime(reference_year, 12, 31)
-        self.data = json.dumps(all_data)
-
-
-class ChartSchema(ma.Schema):
-    class Meta:
-        fields = ("id", "title", "year_start", "year_end", "data", "user_id")
-
-
-chart_schema = ChartSchema()
-charts_schema = ChartSchema(many=True)
 
 
 @app.route("/create_user", methods=["POST"])
@@ -218,7 +143,6 @@ def create_chart(title, **kwargs):
         return chart_schema.jsonify(new_chart)
     except Exception as e:
         return jsonify({"error": f"something went wrong in create_task(): {e}"})
-
 
 
 @app.route("/create_sample/<title>", methods=["POST"])
