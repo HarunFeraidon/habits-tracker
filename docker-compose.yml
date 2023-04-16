@@ -1,20 +1,32 @@
 version: '3'
 services:
   backend:
-    build: ./backend  # Update to backend directory as build context for Flask backend
+    build: ./backend 
     ports:
       - "5000:5000"  # Expose port 5000 for Flask backend
+    env_file:
+      - .env
     networks:
-      - my_network  # Connect to the Docker network named my_network
-
+      - my_network  
+  db: 
+    image: mysql:latest 
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password  # Set your desired root password
+      MYSQL_DATABASE: habits_tracker  # Set your desired database name
+      MYSQL_USER: your_mysql_user  # Set your desired MySQL user
+      MYSQL_PASSWORD: your_mysql_password  # Set your desired MySQL password
+    volumes:
+      - ./db_data:/var/lib/mysql  # Mount a local directory for MySQL data persistence
+    networks:
+      - my_network
   frontend:
-    build: ./frontend  # Update to frontend directory as build context for React frontend
+    build: ./frontend 
     ports:
-      - "3000:3000"  # Expose port 3000 for React frontend
+      - "3000:3000" 
     links:
       - backend
     networks:
-      - my_network  # Connect to the Docker network named my_network
+      - my_network  
 
 networks:
-  my_network:  # Define a Docker network named my_network
+  my_network: 

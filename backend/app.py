@@ -15,7 +15,10 @@ CORS(app)
 
 load_dotenv()
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:@localhost/habits_tracker"
+# for local dev "mysql+pymysql://root:@localhost/habits_tracker"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://your_mysql_user:your_mysql_password@db/habits_tracker"
+
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
@@ -23,6 +26,11 @@ db.init_app(app)
 migrate.init_app(app, db)
 ma.init_app(app)
 
+# create the DB on demand
+@app.before_first_request
+def create_tables():
+    with app.app_context():
+        db.create_all()
 
 # Function to decode and verify JWT token
 def decode_jwt(token):

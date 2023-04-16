@@ -104,7 +104,6 @@ function App() {
    */
   const responseMessage = (credentialResponse) => {
     var decoded = jwt_decode(credentialResponse.credential);
-    console.log(decoded);
     createUser(decoded.email)
   };
   const errorMessage = (error) => {
