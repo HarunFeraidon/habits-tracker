@@ -1,13 +1,14 @@
 # Habits Tracker
-![Imgur](https://imgur.com/QNDKC2M.gif)
+<!-- ![Imgur](https://imgur.com/QNDKC2M.gif) -->
+<img src="https://imgur.com/QNDKC2M.gif"  width="90%" height="90%">
 
 
-## What is it
-Keep track of your daily goals or help build your habits by using GitHub style contribution charts.
+## Summary
+Keep track of your daily goals or help build habits by using GitHub-style contribution charts to track your daily progress.
  
 ## Inspiration
 I thought it may be quite useful to see a visualization of how my goals are going, and realized that GitHub's charts do a good job at this.
-I wanted to be able the idea with others, so you can create an account and participate yourself.
+I wanted to be able share the idea with others, so you can create an account and participate yourself.
 
 ## Authentication
 Authentication is handled via [Google](https://developers.google.com/identity/gsi/web/guides/overview). View their page to learn more about it. 
@@ -16,5 +17,5 @@ Authentication is handled via [Google](https://developers.google.com/identity/gs
 
 1. "Data from Sign in with Google is not used for ads or other non-security purposes." - Google
 2. Because we want you to be able to create charts, your email you authenticated with is stored to create an account.
-3. No other items are stored or even accessed/viewed.
+3. No other private information is stored or even accessed/viewed, that includes name, passwords, and etc. Cookies are created (but not stored) and set to expire after 30 minutes or after logging out.
 

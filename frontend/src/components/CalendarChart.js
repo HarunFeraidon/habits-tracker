@@ -16,10 +16,10 @@ function CalendarChart(props) {
 
     const ticks = ["Loss", 0, 1000];
     const colorScaleFn = (value) => {
-        if (value == 0) {
+        if (value === 0) {
             return colors[0];
         }
-        if (value == 1) {
+        if (value === 1) {
             return colors[1];
         }
         return colors[colors.length - 1];

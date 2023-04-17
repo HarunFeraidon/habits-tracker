@@ -162,11 +162,11 @@ function App() {
           </div>
         </div>
       ) : (
-        <div class="container">
-          <h1 class="text-center">Daily Habits Tracker</h1> <br />
-          <p class=" welcome">To get started, authenticate through your Google account.</p>
-          <p class="subtle-text welcome">The only information used is your email address, to ensure a unique profile</p>
-          <div class="text-center">
+        <div className="container">
+          <h1 className="text-center">Daily Habits Tracker</h1> <br />
+          <p className=" welcome">To get started, authenticate through your Google account.</p>
+          <p className="subtle-text welcome">The only information used is your email address, to ensure a unique profile</p>
+          <div className="text-center">
             <GoogleLogin
               onSuccess={responseMessage}
               onError={errorMessage}
