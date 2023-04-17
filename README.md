@@ -1,7 +1,5 @@
 # Habits Tracker
-![Imgur](https://imgur.com/QNDKC2M.gif)
-<img src="https://imgur.com/QNDKC2M.gif" width="50%" height="50%">
-<img src="https://imgur.com/QNDKC2M.gif"  width="80%" height="80%">
+<!-- ![Imgur](https://imgur.com/QNDKC2M.gif) -->
 <img src="https://imgur.com/QNDKC2M.gif"  width="90%" height="90%">
 
 
